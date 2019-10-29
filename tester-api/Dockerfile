@@ -2,16 +2,16 @@
 WORKDIR /app
 
 # copy csproj and restore as distinct layers
-COPY *.csproj ./dotnetapp/
+COPY ../* ./dotnetapp/
 #COPY utils/*.csproj ./utils/
-WORKDIR /app/dotnetapp
+WORKDIR /app/dotnetapp/tester-api
 RUN dotnet restore
 
 # copy and publish app and libraries
-WORKDIR /app/
-COPY dotnetapp/. ./dotnetapp/
+#WORKDIR /app/
+#COPY dotnetapp/. ./dotnetapp/
 #COPY utils/. ./utils/
-WORKDIR /app/dotnetapp
+#WORKDIR /app/dotnetapp
 RUN dotnet publish -c Release -o out
 
 
