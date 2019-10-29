@@ -1,0 +1,16 @@
+C:\PROJECTS\site-tester\tester-core\tester-core\bin\Debug\netcoreapp3.0\tester-core.deps.json
+C:\PROJECTS\site-tester\tester-core\tester-core\bin\Debug\netcoreapp3.0\tester-core.dll
+C:\PROJECTS\site-tester\tester-core\tester-core\obj\Debug\netcoreapp3.0\tester-core.csprojAssemblyReference.cache
+C:\PROJECTS\site-tester\tester-core\tester-core\obj\Debug\netcoreapp3.0\tester-core.AssemblyInfoInputs.cache
+C:\PROJECTS\site-tester\tester-core\tester-core\obj\Debug\netcoreapp3.0\tester-core.AssemblyInfo.cs
+C:\PROJECTS\site-tester\tester-core\tester-core\bin\Debug\netcoreapp3.0\tester-core.pdb
+C:\PROJECTS\site-tester\tester-core\tester-core\obj\Debug\netcoreapp3.0\tester-core.dll
+C:\PROJECTS\site-tester\tester-core\tester-core\obj\Debug\netcoreapp3.0\tester-core.pdb
+C:\PROJECTS\site-tester\tester-core\bin\Debug\netcoreapp3.0\tester-core.deps.json
+C:\PROJECTS\site-tester\tester-core\bin\Debug\netcoreapp3.0\tester-core.dll
+C:\PROJECTS\site-tester\tester-core\bin\Debug\netcoreapp3.0\tester-core.pdb
+C:\PROJECTS\site-tester\tester-core\obj\Debug\netcoreapp3.0\tester-core.csprojAssemblyReference.cache
+C:\PROJECTS\site-tester\tester-core\obj\Debug\netcoreapp3.0\tester-core.AssemblyInfoInputs.cache
+C:\PROJECTS\site-tester\tester-core\obj\Debug\netcoreapp3.0\tester-core.AssemblyInfo.cs
+C:\PROJECTS\site-tester\tester-core\obj\Debug\netcoreapp3.0\tester-core.dll
+C:\PROJECTS\site-tester\tester-core\obj\Debug\netcoreapp3.0\tester-core.pdb
