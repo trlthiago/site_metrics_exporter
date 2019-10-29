@@ -1,7 +1,6 @@
 ﻿using PuppeteerSharp;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using tester_core.Models;
 
@@ -9,6 +8,9 @@ namespace tester_core
 {
     public class Services : IDisposable
     {
+
+        public static string ChromePath = string.Empty;
+
         //https://automationrhapsody.com/performance-testing-in-the-browser/
 
         private Browser _browser { get; set; }
@@ -18,7 +20,7 @@ namespace tester_core
             get
             {
                 if (_browser == null)
-                    _browser = Puppeteer.LaunchAsync(new LaunchOptions { Headless = true, Devtools=false, ExecutablePath = @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" }).Result;
+                    _browser = Puppeteer.LaunchAsync(new LaunchOptions { Headless = true, Devtools=false, ExecutablePath = ChromePath }).Result;
                 return _browser;
             }
         }

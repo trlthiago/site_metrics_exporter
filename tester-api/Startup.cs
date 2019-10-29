@@ -9,6 +9,7 @@ namespace tester_api
 {
     public class Startup
     {
+
         public IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration)
@@ -30,6 +31,7 @@ namespace tester_api
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                Services.ChromePath = @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
             }
 
             app.UseRouting();
