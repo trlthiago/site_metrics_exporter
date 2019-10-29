@@ -20,14 +20,22 @@ namespace tester_core
             get
             {
                 if (_browser == null)
-                    _browser = Puppeteer.LaunchAsync(new LaunchOptions { Headless = true, Devtools=false, ExecutablePath = ChromePath }).Result;
+                {
+                    _browser = Puppeteer.LaunchAsync(new LaunchOptions { Headless = true, Devtools = false, ExecutablePath = ChromePath }).Result;
+                }
                 return _browser;
             }
         }
 
         public Services()
         {
+            if (string.IsNullOrWhiteSpace(ChromePath))
+                DownloadChromeAsync().Wait();
+        }
 
+        private async Task DownloadChromeAsync()
+        {
+            await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultRevision);
         }
 
         public async void AccessPage(string url)
