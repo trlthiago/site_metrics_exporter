@@ -187,7 +187,7 @@ namespace tester_core
                 assetsPerf.Add(b);
             }
 
-            //await page.CloseAsync();
+            await page.CloseAsync();
 
             return assetsPerf;
         }
