@@ -1,3 +1,8 @@
+tester-api/obj/
+tester-console/bin/
+tester-console/obj/
+tester-core/obj/
+
 .vs/*
 
 # User-specific files
@@ -10,7 +15,6 @@
 *.userprefs
 
 *.cache
-
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

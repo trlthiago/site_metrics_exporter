@@ -12,7 +12,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "metrics?url=google.com",
+      "launchUrl": "metrics?url=blog.umbler.com",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
