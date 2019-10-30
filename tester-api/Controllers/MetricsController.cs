@@ -38,7 +38,7 @@ namespace tester_api.Controllers
 
                     sb.AppendLine($"# HELP {name} (SystemDriverResidentBytes)");
                     sb.AppendLine($"# TYPE {name} gauge");
-                    sb.AppendLine($"{name}{{url=\"{url}\",asset=\"{metric.name}\"}} {field.GetValue(metric)}");
+                    sb.AppendLine($"{name}{{asset=\"{metric.name}\",type=\"{metric.entryType}\"}} {field.GetValue(metric)}");
                 }
 
                 //sb.AppendLine($"# HELP duration (SystemDriverResidentBytes)");
