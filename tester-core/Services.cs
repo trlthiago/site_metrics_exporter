@@ -230,6 +230,8 @@ namespace tester_core
 
                 response = await page.GoToAsync(url, WaitUntilNavigation.Networkidle0);
 
+                await page.WaitForNavigationAsync(new NavigationOptions { WaitUntil = new WaitUntilNavigation[] { WaitUntilNavigation.Networkidle0 }, Timeout = 60000 });
+
                 if (response == null)
                     throw new Exception("Null Response for " + url);
 
