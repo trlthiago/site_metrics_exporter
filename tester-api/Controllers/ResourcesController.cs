@@ -8,11 +8,11 @@ using tester_core.Models;
 namespace tester_api.Controllers
 {
     [Route("[controller]")]
-    public class MetricsController : Controller
+    public class ResourcesController : Controller
     {
         private readonly Services _services;
 
-        public MetricsController(Services services)
+        public ResourcesController(Services services)
         {
             _services = services;
         }

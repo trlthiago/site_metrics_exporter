@@ -8,11 +8,11 @@ using tester_core.Models;
 namespace tester_api.Controllers
 {
     [Route("[controller]")]
-    public class MetricsController : Controller
+    public class SiteController : Controller
     {
         private readonly Services _services;
 
-        public MetricsController(Services services)
+        public SiteController(Services services)
         {
             _services = services;
         }
@@ -22,6 +22,8 @@ namespace tester_api.Controllers
             if (string.IsNullOrWhiteSpace(url))
                 return Json("");
 
+            var metrics1 = await _services.AccessPageAndGetTiming(url.NormalizeUrl());
+            
             var metrics = await _services.AccessPageAndGetResources(url.NormalizeUrl());
 
             StringBuilder sb = new StringBuilder();

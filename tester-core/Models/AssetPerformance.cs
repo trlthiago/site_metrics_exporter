@@ -79,10 +79,12 @@ namespace tester_core.Models
         [Prometheus(Name = "site_response_time")]
         public double GetResponseTime => responseEnd - startTime;
 
+        [Prometheus(Name = "site_loaded")]
         public double GetLoadEventEnd => loadEventEnd - startTime;
 
         public double GetDomInteractive => domInteractive - startTime;
 
+        [Prometheus(Name = "site_dom_content_loaded")]
         public double GetDomContentLoadedEventEnd => domContentLoadedEventEnd - startTime;
 
         [Prometheus(Name = "site_dns_time")]

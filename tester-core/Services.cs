@@ -69,11 +69,9 @@ namespace tester_core
             await page.CloseAsync();
         }
 
-        public async void AccessPageAndGetMetrics(string url)
+        public async Task<Dictionary<string, decimal>> AccessPageAndGetMetrics(string url)
         {
             var page = await Browser.NewPageAsync();
-
-            var metrics1 = await page.MetricsAsync();
 
             Response response;
 
@@ -87,20 +85,22 @@ namespace tester_core
             {
                 Console.WriteLine(e.Message);
                 await page.CloseAsync();
-                return;
+                throw e;
             }
 
             var metrics2 = await page.MetricsAsync();
 
             Console.WriteLine("Status Code: " + response.Status);
 
-            await page.ScreenshotAsync("D:\\screens\\" + new Uri(url).Host + ".png");
+            //await page.ScreenshotAsync("D:\\screens\\" + new Uri(url).Host + ".png");
 
             Console.WriteLine("Trying close the " + url);
             await page.CloseAsync();
+
+            return metrics2;
         }
 
-        public async void AccessPageAndGetTiming(string url)
+        public async Task<Dictionary<string, decimal>> AccessPageAndGetMetricsByTrl(string url)
         {
             var page = await Browser.NewPageAsync();
 
@@ -117,26 +117,26 @@ namespace tester_core
                 response = await page.GoToAsync(url);
                 if (response == null)
                     throw new Exception("Null Response for " + url);
+                var metrics2 = await MetricsAsync(cpd);
+                System.Threading.Thread.Sleep(10000);
+                var metrics3 = await MetricsAsync(cpd);
+
+                foreach (var metric1 in metrics1)
+                {
+                    var m2 = metrics2[metric1.Key];
+                    var m3 = metrics3[metric1.Key];
+                    Console.WriteLine($"{metric1.Key,30} | {metric1.Value,15} | {m2,15} | {m3,15}");
+                }
+                return metrics2;
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                await page.CloseAsync();
-                return;
+                throw e;
             }
-
-            var metrics2 = await MetricsAsync(cpd);
-
-            foreach (var metric1 in metrics1)
+            finally
             {
-                var m2 = metrics2[metric1.Key];
-                Console.WriteLine($"{metric1.Key,30} | {metric1.Value,15} | {m2,15}");
+                await page.CloseAsync();
             }
-
-            //await page.ScreenshotAsync("D:\\screens\\" + new Uri(url).Host + ".png");
-
-            Console.WriteLine("Trying close the " + url);
-            await page.CloseAsync();
         }
 
         public async void AccessPageAndTrace(string url)
@@ -166,43 +166,146 @@ namespace tester_core
             await page.CloseAsync();
         }
 
-        public async Task<List<AssetPerformance>> AccessPageAndGetResources(string url)
+        public async Task<List<AssetPerformance>> AccessPageAndGetTiming(string url)
         {
             var page = await Browser.NewPageAsync();
 
-            Response response;
-
             try
             {
+                Response response;
+
                 response = await page.GoToAsync(url, WaitUntilNavigation.Networkidle0);
 
                 if (response == null)
                     throw new Exception("Null Response for " + url);
+
+                //https://github.com/GoogleChrome/puppeteer/issues/417
+                //var entries2 = await page.EvaluateExpressionAsync<object>("performance.getEntries().filter(e => e.entryType === 'resource').map(e => {e.name})");
+                //var entries2 = await page.EvaluateExpressionAsync<object>("performance.getEntries().filter(e => e.entryType !== 'resource').map(e => e.name)");
+                //var entries1 = await page.EvaluateExpressionAsync<string[]>("performance.getEntries().map(e=> JSON.stringify(e, null, 2))");
+                var entries2 = await page.EvaluateExpressionAsync<string>("JSON.stringify(performance.timing)");
+
+                var metric = Newtonsoft.Json.JsonConvert.DeserializeObject<PerformanceMetrics>(entries2);
+
+
+                //var entries2 = await page.EvaluateExpressionAsync<object>("performance.getEntries().filter(e => e.entryType !== 'resource').map(e => e.name)");
+                var entries1 = await page.EvaluateExpressionAsync<string[]>("performance.getEntries().filter(e => e.entryType === 'navigation').map(e=> JSON.stringify(e, null, 2))");
+
+                List<AssetPerformance> assetsPerf = new List<AssetPerformance>();
+
+                foreach (var entry in entries1)
+                {
+                    var b = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetPerformance>(entry);
+                    assetsPerf.Add(b);
+                }
+
+
+                //List<AssetPerformance> assetsPerf = new List<AssetPerformance>();
+
+                //foreach (var entry in entries1)
+                //{
+                //    var b = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetPerformance>(entry);
+                //    assetsPerf.Add(b);
+                //}
+
+                return assetsPerf;
             }
             catch (Exception e)
             {
-                await page.CloseAsync();
                 throw e;
             }
-
-            //https://github.com/GoogleChrome/puppeteer/issues/417
-            //var entries = await page.EvaluateExpressionAsync("performance.getEntries()");
-            //var entries2 = await page.EvaluateExpressionAsync<object>("JSON.parse(performance.getEntries())");
-            //var entries2 = await page.EvaluateExpressionAsync<object>("performance.getEntries().filter(e => e.entryType === 'resource').map(e => {e.name})");
-            //var entries2 = await page.EvaluateExpressionAsync<object>("performance.getEntries().filter(e => e.entryType !== 'resource').map(e => e.name)");
-            var entries1 = await page.EvaluateExpressionAsync<string[]>("performance.getEntries().map(e=> JSON.stringify(e, null, 2))");
-
-            List<AssetPerformance> assetsPerf = new List<AssetPerformance>();
-
-            foreach (var entry in entries1)
+            finally
             {
-                var b = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetPerformance>(entry);
-                assetsPerf.Add(b);
+                await page.CloseAsync();
             }
+        }
 
-            await page.CloseAsync();
+        public async Task<List<AssetPerformance>> AccessPageAndGetResources(string url)
+        {
+            var page = await Browser.NewPageAsync();
 
-            return assetsPerf;
+            try
+            {
+                Response response;
+
+                response = await page.GoToAsync(url, WaitUntilNavigation.Networkidle0);
+
+                if (response == null)
+                    throw new Exception("Null Response for " + url);
+
+                //https://github.com/GoogleChrome/puppeteer/issues/417
+                //var entries2 = await page.EvaluateExpressionAsync<object>("performance.getEntries().filter(e => e.entryType === 'resource').map(e => {e.name})");
+                //var entries2 = await page.EvaluateExpressionAsync<object>("performance.getEntries().filter(e => e.entryType !== 'resource').map(e => e.name)");
+                var entries1 = await page.EvaluateExpressionAsync<string[]>("performance.getEntries().map(e=> JSON.stringify(e, null, 2))");
+
+                List<AssetPerformance> assetsPerf = new List<AssetPerformance>();
+
+                foreach (var entry in entries1)
+                {
+                    var b = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetPerformance>(entry);
+                    assetsPerf.Add(b);
+                }
+
+                return assetsPerf;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally
+            {
+                await page.CloseAsync();
+            }
+        }
+
+        public async Task<List<AssetPerformance>> AccessPageAndGetResourcesFull(string url)
+        {
+            var page = await Browser.NewPageAsync();
+
+            try
+            {
+                CDPSession cpd = await page.Target.CreateCDPSessionAsync();
+
+                await cpd.SendAsync("Performance.enable");
+
+                Response response;
+
+                response = await page.GoToAsync(url, WaitUntilNavigation.Networkidle0);
+
+                if (response == null)
+                    throw new Exception("Null Response for " + url);
+
+                //https://github.com/GoogleChrome/puppeteer/issues/417
+                //var entries2 = await page.EvaluateExpressionAsync<object>("performance.getEntries().filter(e => e.entryType === 'resource').map(e => {e.name})");
+                //var entries2 = await page.EvaluateExpressionAsync<object>("performance.getEntries().filter(e => e.entryType !== 'resource').map(e => e.name)");
+                var entries1 = await page.EvaluateExpressionAsync<string[]>("performance.getEntries().map(e=> JSON.stringify(e, null, 2))");
+
+                var metrics2 = await MetricsAsync(cpd);
+
+                foreach (var metric1 in metrics2)
+                {
+                    var m2 = metrics2[metric1.Key];
+                    Console.WriteLine($"{metric1.Key,30} | {metric1.Value,15} | {m2,15}");
+                }
+
+                List<AssetPerformance> assetsPerf = new List<AssetPerformance>();
+
+                foreach (var entry in entries1)
+                {
+                    var b = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetPerformance>(entry);
+                    assetsPerf.Add(b);
+                }
+
+                return assetsPerf;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            finally
+            {
+                await page.CloseAsync();
+            }
         }
 
         private bool IsInFailure(Page page, Response response)
