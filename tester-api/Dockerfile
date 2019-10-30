@@ -1,28 +1,24 @@
 ﻿FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS build
 WORKDIR /app
 
-# copy csproj and restore as distinct layers
-COPY ../* ./dotnetapp/
-#COPY utils/*.csproj ./utils/
+COPY . ./dotnetapp/
+
 WORKDIR /app/dotnetapp/tester-api
 RUN dotnet restore
 
-# copy and publish app and libraries
-#WORKDIR /app/
-#COPY dotnetapp/. ./dotnetapp/
-#COPY utils/. ./utils/
-#WORKDIR /app/dotnetapp
 RUN dotnet publish -c Release -o out
 
+#FROM mcr.microsoft.com/dotnet/core/runtime:3.0 AS runtime
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.0 AS runtime
 
-# test application -- see: dotnet-docker-unit-testing.md
-#FROM build AS testrunner
-#WORKDIR /app/tests
-#COPY tests/. .
-#ENTRYPOINT ["dotnet", "test", "--logger:trx"]
+RUN apt-get update && \
+     apt-get install -yq --no-install-recommends \
+     libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 \
+     libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 \
+     libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 \
+     libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 \
+     libnss3
 
-
-FROM mcr.microsoft.com/dotnet/core/runtime:3.0 AS runtime
 WORKDIR /app
-COPY --from=build /app/dotnetapp/out ./
+COPY --from=build /app/dotnetapp/tester-api/out ./
 ENTRYPOINT ["dotnet", "tester-api.dll"]
