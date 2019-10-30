@@ -47,8 +47,8 @@ namespace tester_core.Models
         public string initiatorType { get; set; }
         public string nextHopProtocol { get; set; }
         public int workerStart { get; set; }
-        public int redirectStart { get; set; }
-        public int redirectEnd { get; set; }
+        public double redirectStart { get; set; }
+        public double redirectEnd { get; set; }
         public double fetchStart { get; set; }
         public double domainLookupStart { get; set; }
         public double domainLookupEnd { get; set; }
@@ -58,12 +58,12 @@ namespace tester_core.Models
         public double requestStart { get; set; }
         public double responseStart { get; set; }
         public double responseEnd { get; set; }
-        public int transferSize { get; set; }
-        public int encodedBodySize { get; set; }
-        public int decodedBodySize { get; set; }
+        public double transferSize { get; set; }
+        public double encodedBodySize { get; set; }
+        public double decodedBodySize { get; set; }
         public List<object> serverTiming { get; set; }
-        public int unloadEventStart { get; set; }
-        public int unloadEventEnd { get; set; }
+        public double unloadEventStart { get; set; }
+        public double unloadEventEnd { get; set; }
         public double domInteractive { get; set; }
         public double domContentLoadedEventStart { get; set; }
         public double domContentLoadedEventEnd { get; set; }
