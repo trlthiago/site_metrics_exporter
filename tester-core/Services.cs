@@ -21,7 +21,10 @@ namespace tester_core
             {
                 if (_browser == null)
                 {
-                    _browser = Puppeteer.LaunchAsync(new LaunchOptions { Headless = true, Devtools = false, ExecutablePath = ChromePath }).Result;
+                    var options = new LaunchOptions { Headless = true, Devtools = false, ExecutablePath = ChromePath };
+                    if (string.IsNullOrWhiteSpace(ChromePath))
+                        options.Args = new string[] { "--no-sandbox" };
+                    _browser = Puppeteer.LaunchAsync(options).Result;
                 }
                 return _browser;
             }
