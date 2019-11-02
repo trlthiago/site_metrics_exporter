@@ -36,6 +36,9 @@ namespace tester_api
 
             app.UseRouting();
 
+            if (!System.IO.Directory.Exists("screens"))
+                System.IO.Directory.CreateDirectory("screens");
+
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "screens")),
