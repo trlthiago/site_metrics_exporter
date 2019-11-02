@@ -33,14 +33,14 @@ namespace tester_api.Controllers
 
             name = "site_response_status";
             sb.AppendLine($"# HELP {name} TRL");
-            sb.AppendLine($"# TYPE {name} gauge");
+            sb.AppendLine($"# TYPE {name} UNTYPED");
             sb.AppendLine($"{name} {siteMetrics.SiteStatus}");
 
             if (!string.IsNullOrWhiteSpace(siteMetrics.ScreenShotPath))
             {
                 name = "site_screenshot";
                 sb.AppendLine($"# HELP {name} TRL");
-                sb.AppendLine($"# TYPE {name} gauge");
+                sb.AppendLine($"# TYPE {name} UNTYPED");
                 sb.AppendLine($"{name} {siteMetrics.ScreenShotPath}");
             }
 
