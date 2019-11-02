@@ -413,6 +413,9 @@ namespace tester_core
                     }
                 }
 
+                if (response == null)
+                    throw new Exception("Null Response for " + url);
+
                 var havestatusRedirect = (int)response.Status >= 300;
 
                 var haveRedirect = await page.QuerySelectorAsync("meta[http-equiv=refresh]");
@@ -422,14 +425,9 @@ namespace tester_core
                     response = await page.WaitForNavigationAsync(new NavigationOptions { WaitUntil = new WaitUntilNavigation[] { WaitUntilNavigation.Networkidle0 }, Timeout = 60000 });
                 }
 
-                if (response == null)
-                    throw new Exception("Null Response for " + url);
-
                 await EnsurePageLooksOkUnsafe(page, response);
                 siteMetrics.SiteStatus += response.Status.ToString();
                 siteMetrics.Assets = await GetEntriesMetrics(page);
-
-               
 
                 return siteMetrics;
             }

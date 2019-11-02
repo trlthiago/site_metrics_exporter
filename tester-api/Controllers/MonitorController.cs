@@ -44,20 +44,21 @@ namespace tester_api.Controllers
                 sb.AppendLine($"{name} {siteMetrics.ScreenShotPath}");
             }
 
-            foreach (var metric in siteMetrics.Assets)
-            {
-                var fields = typeof(AssetPerformance).GetProperties()
-                                                     .Where(methodInfo => methodInfo.GetCustomAttributes(typeof(PrometheusAttribute), true).Length > 0)
-                                                     .ToList();
-                foreach (var field in fields)
+            if (siteMetrics.Assets != null)
+                foreach (var metric in siteMetrics.Assets)
                 {
-                    name = field.GetCustomAttributes(typeof(PrometheusAttribute), true)[0].ToString();
+                    var fields = typeof(AssetPerformance).GetProperties()
+                                                         .Where(methodInfo => methodInfo.GetCustomAttributes(typeof(PrometheusAttribute), true).Length > 0)
+                                                         .ToList();
+                    foreach (var field in fields)
+                    {
+                        name = field.GetCustomAttributes(typeof(PrometheusAttribute), true)[0].ToString();
 
-                    sb.AppendLine($"# HELP {name} (SystemDriverResidentBytes)");
-                    sb.AppendLine($"# TYPE {name} gauge");
-                    sb.AppendLine($"{name}{{asset=\"{metric.name}\",type=\"{metric.entryType}\"}} {field.GetValue(metric)}");
+                        sb.AppendLine($"# HELP {name} (SystemDriverResidentBytes)");
+                        sb.AppendLine($"# TYPE {name} gauge");
+                        sb.AppendLine($"{name}{{asset=\"{metric.name}\",type=\"{metric.entryType}\"}} {field.GetValue(metric)}");
+                    }
                 }
-            }
             return Ok(sb.ToString());
         }
     }
