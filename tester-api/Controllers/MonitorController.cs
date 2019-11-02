@@ -29,7 +29,7 @@ namespace tester_api.Controllers
             var name = "site_up";
             sb.AppendLine($"# HELP {name} TRL");
             sb.AppendLine($"# TYPE {name} gauge");
-            sb.AppendLine($"{name}{{response=\"{siteMetrics.SiteStatus}\",screenshot=\"{siteMetrics.SiteStatus}\"}} {siteMetrics.IsSiteUp}");
+            sb.AppendLine($"{name}{{response=\"{siteMetrics.SiteStatus}\",screenshot=\"{siteMetrics.ScreenShotPath}\"}} {siteMetrics.IsSiteUp}");
 
             if (siteMetrics.Assets != null)
                 foreach (var metric in siteMetrics.Assets)
