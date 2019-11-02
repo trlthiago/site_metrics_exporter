@@ -41,32 +41,71 @@ namespace tester_core
             await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultRevision);
         }
 
-        public async void AccessPage(string url)
+        private async Task EnsurePageLooksOkUnsafe(Page page, Response response)
         {
-            var page = await Browser.NewPageAsync();
+            //Console.WriteLine("a");
+            string title = await page.GetTitleAsync();
+            //Console.WriteLine("b");
 
-            Response response;
+            if (title.StartsWith("503"))
+                throw new Exception("The page title starts with 503.");
+
+            if ((int)response.Status >= 300)
+                throw new Exception("The Status Code is greater than 300.");
+        }
+
+        public async Task<SiteMetrics> AccessPage(string url)
+        {
+            var siteMetrics = new SiteMetrics();
+            var page = await Browser.NewPageAsync();
 
             try
             {
-                response = await page.GoToAsync(url);
+                string rsp = "";
+                Response response;
+                response = await page.GoToAsync(url); //, WaitUntilNavigation.Networkidle0
+                string text;
+                if (response == null)
+                {
+                    try
+                    {
+                        rsp += "response null; ";
+                        response = await page.WaitForNavigationAsync(new NavigationOptions { WaitUntil = new WaitUntilNavigation[] { WaitUntilNavigation.Networkidle0 }, Timeout = 60000 });
+                        rsp += "get content after waiting time; ";
+                        text = await page.GetContentAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        throw e;
+                    }
+                }
+
+                var havestatusRedirect = (int)response.Status >= 300;
+
+                var haveRedirect = await page.QuerySelectorAsync("meta[http-equiv=refresh]");
+                if (haveRedirect != null)
+                {
+                    rsp += "REDIRECT!; ";
+                    response = await page.WaitForNavigationAsync(new NavigationOptions { WaitUntil = new WaitUntilNavigation[] { WaitUntilNavigation.Networkidle0 }, Timeout = 60000 });
+                }
+
                 if (response == null)
                     throw new Exception("Null Response for " + url);
+
+                await EnsurePageLooksOkUnsafe(page, response);
+
+                siteMetrics.SiteStatus += rsp + response.Status.ToString();
+                return siteMetrics;
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                await page.CloseAsync();
-                return;
+                siteMetrics.SiteStatus += e.Message;
+                return siteMetrics;
             }
-
-            Console.WriteLine("Status Code: " + response.Status);
-
-            await page.ScreenshotAsync("D:\\screens\\" + new Uri(url).Host + ".png");
-
-            Console.WriteLine("Trying close the " + url);
-
-            await page.CloseAsync();
+            finally
+            {
+                await page.CloseAsync();
+            }
         }
 
         public async Task<Dictionary<string, decimal>> AccessPageAndGetMetrics(string url)
@@ -94,7 +133,6 @@ namespace tester_core
 
             //await page.ScreenshotAsync("D:\\screens\\" + new Uri(url).Host + ".png");
 
-            Console.WriteLine("Trying close the " + url);
             await page.CloseAsync();
 
             return metrics2;
@@ -235,20 +273,7 @@ namespace tester_core
                 if (response == null)
                     throw new Exception("Null Response for " + url);
 
-                //https://github.com/GoogleChrome/puppeteer/issues/417
-                //var entries2 = await page.EvaluateExpressionAsync<object>("performance.getEntries().filter(e => e.entryType === 'resource').map(e => {e.name})");
-                //var entries2 = await page.EvaluateExpressionAsync<object>("performance.getEntries().filter(e => e.entryType !== 'resource').map(e => e.name)");
-                var entries1 = await page.EvaluateExpressionAsync<string[]>("performance.getEntries().map(e=> JSON.stringify(e, null, 2))");
-
-                List<AssetPerformance> assetsPerf = new List<AssetPerformance>();
-
-                foreach (var entry in entries1)
-                {
-                    var b = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetPerformance>(entry);
-                    assetsPerf.Add(b);
-                }
-
-                return assetsPerf;
+                return await GetEntriesMetrics(page);
             }
             catch (Exception e)
             {
@@ -259,58 +284,183 @@ namespace tester_core
                 await page.CloseAsync();
             }
         }
-
-        public async Task<List<AssetPerformance>> AccessPageAndGetResourcesFull(string url)
+      
+        private static async Task<List<AssetPerformance>> GetNavigationMetrics(Page page)
         {
+            //https://github.com/GoogleChrome/puppeteer/issues/417
+            var entries1 = await page.EvaluateExpressionAsync<string[]>("performance.getEntries().filter(e => e.entryType === 'navigation').map(e=> JSON.stringify(e, null, 2))");
+
+            List<AssetPerformance> assetsPerf = new List<AssetPerformance>();
+
+            foreach (var entry in entries1)
+            {
+                var b = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetPerformance>(entry);
+                assetsPerf.Add(b);
+            }
+
+            return assetsPerf;
+        }
+
+        private static async Task<List<AssetPerformance>> GetEntriesMetrics(Page page)
+        {
+            //https://github.com/GoogleChrome/puppeteer/issues/417
+            var entries1 = await page.EvaluateExpressionAsync<string[]>("performance.getEntries().map(e=> JSON.stringify(e, null, 2))");
+
+            List<AssetPerformance> assetsPerf = new List<AssetPerformance>();
+
+            foreach (var entry in entries1)
+            {
+                var b = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetPerformance>(entry);
+                assetsPerf.Add(b);
+            }
+
+            return assetsPerf;
+        }
+        public async Task<SiteMetrics> AccessPageAndTakeScreenshot(string url, bool takeScreenShot = false)
+        {
+            var siteMetrics = new SiteMetrics();
             var page = await Browser.NewPageAsync();
 
             try
             {
-                CDPSession cpd = await page.Target.CreateCDPSessionAsync();
-
-                await cpd.SendAsync("Performance.enable");
-
+                string rsp = "";
                 Response response;
+                response = await page.GoToAsync(url); //, WaitUntilNavigation.Networkidle0
+                string text;
+                if (response == null /*|| response.Request.Url != url*/)
+                {
+                    try
+                    {
+                        rsp += "response null; ";
+                        response = await page.WaitForNavigationAsync(new NavigationOptions { WaitUntil = new WaitUntilNavigation[] { WaitUntilNavigation.Networkidle0 }, Timeout = 60000 });
+                        rsp += "get content after waiting time; ";
+                        text = await page.GetContentAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        throw e;
+                    }
+                }
 
-                response = await page.GoToAsync(url, WaitUntilNavigation.Networkidle0);
+                var havestatusRedirect = (int)response.Status >= 300;
+
+                var haveRedirect = await page.QuerySelectorAsync("meta[http-equiv=refresh]");
+                if (haveRedirect != null)
+                {
+                    rsp += "META-REDIRECT!; ";
+                    response = await page.WaitForNavigationAsync(new NavigationOptions { WaitUntil = new WaitUntilNavigation[] { WaitUntilNavigation.Networkidle0 }, Timeout = 60000 });
+                }
 
                 if (response == null)
                     throw new Exception("Null Response for " + url);
 
-                //https://github.com/GoogleChrome/puppeteer/issues/417
-                //var entries2 = await page.EvaluateExpressionAsync<object>("performance.getEntries().filter(e => e.entryType === 'resource').map(e => {e.name})");
-                //var entries2 = await page.EvaluateExpressionAsync<object>("performance.getEntries().filter(e => e.entryType !== 'resource').map(e => e.name)");
-                var entries1 = await page.EvaluateExpressionAsync<string[]>("performance.getEntries().map(e=> JSON.stringify(e, null, 2))");
+                await EnsurePageLooksOkUnsafe(page, response);
+                siteMetrics.SiteStatus += response.Status.ToString();
+                siteMetrics.Assets = await GetNavigationMetrics(page);
 
-                var metrics2 = await MetricsAsync(cpd);
-
-                foreach (var metric1 in metrics2)
-                {
-                    var m2 = metrics2[metric1.Key];
-                    Console.WriteLine($"{metric1.Key,30} | {metric1.Value,15} | {m2,15}");
-                }
-
-                List<AssetPerformance> assetsPerf = new List<AssetPerformance>();
-
-                foreach (var entry in entries1)
-                {
-                    var b = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetPerformance>(entry);
-                    assetsPerf.Add(b);
-                }
-
-                return assetsPerf;
+                return siteMetrics;
             }
-            catch (Exception e)
+            catch (PuppeteerSharp.NavigationException e) when (e.Message.Contains("net::ERR_NAME_NOT_RESOLVED") || e.Message.Contains("net::ERR_CONNECTION_REFUSED") || e.Message.Contains("net::ERR_CONNECTION_TIMED_OUT"))
             {
-                throw e;
+                Console.WriteLine(e.Message);
+                siteMetrics.SiteStatus += e.Message;
+                return siteMetrics;
             }
+            catch (Exception e) when (!e.Message.Contains("net::ERR_NAME_NOT_RESOLVED"))
+            {
+                if (takeScreenShot)
+                {
+                    if (!System.IO.Directory.Exists("screens"))
+                        System.IO.Directory.CreateDirectory("screens");
+
+                    siteMetrics.ScreenShotPath = System.IO.Path.Combine("screens", new Uri(url).Host + DateTime.UtcNow.ToString("yyyy-MM-dd-HH-mm-ss") + ".png");
+                    await page.ScreenshotAsync(siteMetrics.ScreenShotPath);
+                }
+
+                siteMetrics.SiteStatus += e.Message;
+                return siteMetrics;
+            }
+
             finally
             {
                 await page.CloseAsync();
             }
         }
 
-        private bool IsInFailure(Page page, Response response)
+        public async Task<SiteMetrics> AccessPageAndGetResourcesFull(string url, bool takeScreenShot = false)
+        {
+            var siteMetrics = new SiteMetrics();
+            var page = await Browser.NewPageAsync();
+
+            try
+            {
+                string rsp = "";
+                Response response;
+                response = await page.GoToAsync(url); //, WaitUntilNavigation.Networkidle0
+                string text;
+                if (response == null /*|| response.Request.Url != url*/)
+                {
+                    try
+                    {
+                        rsp += "response null; ";
+                        response = await page.WaitForNavigationAsync(new NavigationOptions { WaitUntil = new WaitUntilNavigation[] { WaitUntilNavigation.Networkidle0 }, Timeout = 60000 });
+                        rsp += "get content after waiting time; ";
+                        text = await page.GetContentAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        throw e;
+                    }
+                }
+
+                var havestatusRedirect = (int)response.Status >= 300;
+
+                var haveRedirect = await page.QuerySelectorAsync("meta[http-equiv=refresh]");
+                if (haveRedirect != null)
+                {
+                    rsp += "META-REDIRECT!; ";
+                    response = await page.WaitForNavigationAsync(new NavigationOptions { WaitUntil = new WaitUntilNavigation[] { WaitUntilNavigation.Networkidle0 }, Timeout = 60000 });
+                }
+
+                if (response == null)
+                    throw new Exception("Null Response for " + url);
+
+                await EnsurePageLooksOkUnsafe(page, response);
+                siteMetrics.SiteStatus += response.Status.ToString();
+                siteMetrics.Assets = await GetEntriesMetrics(page);
+
+               
+
+                return siteMetrics;
+            }
+            catch (PuppeteerSharp.NavigationException e) when (e.Message.Contains("net::ERR_NAME_NOT_RESOLVED") || e.Message.Contains("net::ERR_CONNECTION_REFUSED") || e.Message.Contains("net::ERR_CONNECTION_TIMED_OUT"))
+            {
+                Console.WriteLine(e.Message);
+                siteMetrics.SiteStatus += e.Message;
+                return siteMetrics;
+            }
+            catch (Exception e) when (!e.Message.Contains("net::ERR_NAME_NOT_RESOLVED"))
+            {
+                if (takeScreenShot)
+                {
+                    if (!System.IO.Directory.Exists("screens"))
+                        System.IO.Directory.CreateDirectory("screens");
+
+                    siteMetrics.ScreenShotPath = System.IO.Path.Combine("screens", new Uri(url).Host + DateTime.UtcNow.ToString("yyyy-MM-dd-HH-mm-ss") + ".png");
+                    await page.ScreenshotAsync(siteMetrics.ScreenShotPath);
+                }
+
+                siteMetrics.SiteStatus += e.Message;
+                return siteMetrics;
+            }
+           
+            finally
+            {
+                await page.CloseAsync();
+            }
+        }
+
+        private bool IsInFailureSafe(Page page, Response response)
         {
             if (page.GetTitleAsync().Result.StartsWith("503"))
                 return true;

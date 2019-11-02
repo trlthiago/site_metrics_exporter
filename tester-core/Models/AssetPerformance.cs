@@ -58,6 +58,7 @@ namespace tester_core.Models
         public double requestStart { get; set; }
         public double responseStart { get; set; }
         public double responseEnd { get; set; }
+        [Prometheus(Name = "site_transfer_size")]
         public double transferSize { get; set; }
         public double encodedBodySize { get; set; }
         public double decodedBodySize { get; set; }

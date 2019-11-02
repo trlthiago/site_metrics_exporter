@@ -36,6 +36,12 @@ namespace tester_api
 
             app.UseRouting();
 
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "screens")),
+                RequestPath = "/screens"
+            });
+
             //app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

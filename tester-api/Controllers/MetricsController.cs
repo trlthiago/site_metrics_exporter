@@ -34,7 +34,7 @@ namespace tester_api.Controllers
                 {
                     var name = field.GetCustomAttributes(typeof(PrometheusAttribute), true)[0].ToString();
 
-                    sb.AppendLine($"# HELP {name} (SystemDriverResidentBytes)");
+                    sb.AppendLine($"# HELP {name} TRL");
                     sb.AppendLine($"# TYPE {name} gauge");
                     sb.AppendLine($"{name}{{asset=\"{metric.name}\",type=\"{metric.entryType}\"}} {field.GetValue(metric)}");
                 }

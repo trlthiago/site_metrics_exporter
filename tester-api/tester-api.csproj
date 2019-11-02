@@ -13,4 +13,8 @@
     <ProjectReference Include="..\tester-core\tester-core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="screens\" />
+  </ItemGroup>
+
 </Project>
