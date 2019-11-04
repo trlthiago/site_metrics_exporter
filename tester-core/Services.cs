@@ -284,7 +284,7 @@ namespace tester_core
                 await page.CloseAsync();
             }
         }
-      
+
         private static async Task<List<AssetPerformance>> GetNavigationMetrics(Page page)
         {
             //https://github.com/GoogleChrome/puppeteer/issues/417
@@ -384,6 +384,11 @@ namespace tester_core
             finally
             {
                 await page.CloseAsync();
+                if (_browser != null)
+                {
+                    await _browser.CloseAsync();
+                    _browser.Dispose();
+                }
             }
         }
 
@@ -451,7 +456,7 @@ namespace tester_core
                 siteMetrics.SiteStatus += e.Message;
                 return siteMetrics;
             }
-           
+
             finally
             {
                 await page.CloseAsync();
