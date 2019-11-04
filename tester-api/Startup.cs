@@ -21,9 +21,9 @@ namespace tester_api
         {
             services.AddControllers();
 
-            services.AddTransient<Services>();
+            //services.AddTransient<Services>();
 
-            //services.AddSingleton<Services>();
+            services.AddSingleton<Services>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

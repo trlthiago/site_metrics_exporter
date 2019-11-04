@@ -21,6 +21,16 @@ namespace tester_core
             {
                 if (_browser == null)
                 {
+                    try
+                    {
+                        if (_browser.IsClosed || !_browser.IsConnected)
+                            _browser.Dispose();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+
                     var options = new LaunchOptions { Headless = true, Devtools = false, ExecutablePath = ChromePath };
                     if (string.IsNullOrWhiteSpace(ChromePath))
                         options.Args = new string[] { "--no-sandbox" };
@@ -34,6 +44,13 @@ namespace tester_core
         {
             if (string.IsNullOrWhiteSpace(ChromePath))
                 DownloadChromeAsync().Wait();
+        }
+
+        public async Task<Page[]> GetTabsAsync()
+        {
+            if (_browser == null)
+                return new Page[0];
+            return await _browser.PagesAsync();
         }
 
         private async Task DownloadChromeAsync()
@@ -320,6 +337,7 @@ namespace tester_core
         {
             var siteMetrics = new SiteMetrics();
             var page = await Browser.NewPageAsync();
+            await page.SetCacheEnabledAsync(false);
 
             try
             {
@@ -384,11 +402,6 @@ namespace tester_core
             finally
             {
                 await page.CloseAsync();
-                if (_browser != null)
-                {
-                    await _browser.CloseAsync();
-                    _browser.Dispose();
-                }
             }
         }
 
@@ -496,9 +509,16 @@ namespace tester_core
         {
             if (_browser != null)
             {
+                _browser.Closed += BrowserClosedEvent;
                 await _browser.CloseAsync();
                 _browser.Dispose();
             }
+        }
+
+        private void BrowserClosedEvent(object sender, EventArgs e)
+        {
+            Console.WriteLine("Browser Closed!");
+            Console.WriteLine(e);
         }
     }
 }
