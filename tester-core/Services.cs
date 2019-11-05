@@ -378,13 +378,14 @@ namespace tester_core
 
                 return siteMetrics;
             }
-            catch (PuppeteerSharp.NavigationException e) when (e.Message.Contains("net::ERR_NAME_NOT_RESOLVED") || e.Message.Contains("net::ERR_CONNECTION_REFUSED") || e.Message.Contains("net::ERR_CONNECTION_TIMED_OUT") || e.Message.Contains("net::ERR_CERT_DATE_INVALID"))
+            catch (PuppeteerSharp.NavigationException e) when (e.Message.StartsWith("net::"))
             {
+                // when (e.Message.Contains("net::ERR_NAME_NOT_RESOLVED") || e.Message.Contains("net::ERR_CONNECTION_REFUSED") || e.Message.Contains("net::ERR_CONNECTION_TIMED_OUT") || e.Message.Contains("net::ERR_CERT_DATE_INVALID"))
                 Console.WriteLine(e.Message);
-                siteMetrics.SiteStatus += e.Message;
+                siteMetrics.SiteStatus += e.Message.Split(" ")[0];
                 return siteMetrics;
             }
-            catch (Exception e) when (!e.Message.Contains("net::ERR_NAME_NOT_RESOLVED"))
+            catch (Exception e)
             {
                 if (takeScreenShot)
                 {
