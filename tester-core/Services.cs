@@ -19,18 +19,25 @@ namespace tester_core
         {
             get
             {
-                if (_browser == null)
+                if (_browser != null)
                 {
                     try
                     {
                         if (_browser.IsClosed || !_browser.IsConnected)
+                        {
                             _browser.Dispose();
+                            _browser.CloseAsync().ConfigureAwait(false);
+                            _browser = null;
+                        }
                     }
                     catch (Exception e)
                     {
                         Console.WriteLine(e);
                     }
+                }
 
+                if (_browser == null)
+                {
                     var options = new LaunchOptions { Headless = true, Devtools = false, ExecutablePath = ChromePath };
                     if (string.IsNullOrWhiteSpace(ChromePath))
                         options.Args = new string[] { "--no-sandbox" };
