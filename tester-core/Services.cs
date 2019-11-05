@@ -72,10 +72,10 @@ namespace tester_core
             //Console.WriteLine("b");
 
             if (title.StartsWith("503"))
-                throw new Exception("The page title starts with 503.");
+                throw new Exception("Page title starts with 503");
 
             if ((int)response.Status >= 300)
-                throw new Exception("The Status Code is greater than 300.");
+                throw new Exception("Status >= 300; " + (int)response.Status);
         }
 
         public async Task<SiteMetrics> AccessPage(string url)
