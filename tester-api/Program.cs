@@ -11,7 +11,8 @@ namespace tester_api
             if (args.Length > 0 && args[0] == "bootstrap")
             {
                 Console.WriteLine("args = " + args[0]);
-                new tester_core.Services();
+                var screenshotService = new tester_core.ScreenshotService("screen");
+                new tester_core.Services(screenshotService);
 
             }
             else

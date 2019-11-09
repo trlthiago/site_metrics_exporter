@@ -14,7 +14,7 @@ namespace tester_console
 
             AppDomain.CurrentDomain.ProcessExit += StaticClass_Dtor;
 
-            services = new Services();
+            services = new Services(new ScreenshotService("screens"));
 
             //for (int i = 0; i < 50; i++)
             //{
@@ -25,11 +25,21 @@ namespace tester_console
             foreach (var domain in Domains)
             {
                 //var text = await services.AccessPage(domain.NormalizeUrl());
-                var text = await services.AccessPageAndGetResourcesFull(domain.NormalizeUrl(), true);
+                var text = await services.AccessPageAndGetResourcesFull(domain.NormalizeUrl(), false, true, false, false, false);
                 Console.WriteLine($"{domain,50} | {text.SiteStatus}");
             }
 
             Console.WriteLine("FIM");
+            var tabs = await services.GetTabsAsync();
+            if (tabs != null)
+            {
+                Console.WriteLine("Tabs remaining: " + tabs.Length);
+                foreach (var tab in tabs)
+                {
+                    Console.WriteLine(tab.Url);
+                }
+
+            }
             Console.ReadKey();
         }
 
@@ -41,9 +51,9 @@ namespace tester_console
 
         static List<string> Domains = new List<string>
         {
-            "blog.umbler.com",
+"blog.umbler.com",
 "detab.ga",
-            "provaonline.com.br",
+"provaonline.com.br",
 "provaonlineexame.com.br",
 "educandoomundo.tk",
 "php.educandoomundo.tk",

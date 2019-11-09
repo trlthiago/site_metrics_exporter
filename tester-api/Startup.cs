@@ -9,6 +9,7 @@ namespace tester_api
 {
     public class Startup
     {
+        public static bool TakeSnapshootOnError;
 
         public IConfiguration Configuration { get; }
 
@@ -23,6 +24,7 @@ namespace tester_api
 
             //services.AddTransient<Services>();
 
+            services.AddSingleton(x => new ScreenshotService("screens"));
             services.AddSingleton<Services>();
         }
 
@@ -35,6 +37,9 @@ namespace tester_api
             }
 
             app.UseRouting();
+
+            TakeSnapshootOnError = bool.Parse(System.Environment.GetEnvironmentVariable("SSERROR") ?? "false");
+            System.Console.WriteLine("SSERROR " + TakeSnapshootOnError);
 
             if (!System.IO.Directory.Exists("screens"))
                 System.IO.Directory.CreateDirectory("screens");

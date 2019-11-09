@@ -46,7 +46,7 @@ namespace tester_core.Models
         public long startTime { get; set; }
         public string initiatorType { get; set; }
         public string nextHopProtocol { get; set; }
-        public int workerStart { get; set; }
+        public double workerStart { get; set; }
         public double redirectStart { get; set; }
         public double redirectEnd { get; set; }
         public double fetchStart { get; set; }

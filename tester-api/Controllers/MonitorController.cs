@@ -22,6 +22,39 @@ namespace tester_api.Controllers
             if (string.IsNullOrWhiteSpace(url))
                 return Json("");
 
+            var siteMetrics = await _services.AccessPageAndGetResourcesFull(url.NormalizeUrl(), false, false, true, Startup.TakeSnapshootOnError, false);
+
+            StringBuilder sb = new StringBuilder();
+
+            var name = "site_up";
+            sb.AppendLine($"# HELP {name} TRL");
+            sb.AppendLine($"# TYPE {name} gauge");
+            sb.AppendLine($"{name}{{response=\"{siteMetrics.SiteStatus}\",screenshot=\"{siteMetrics.ScreenShotPath}\"}} {siteMetrics.IsSiteUp}");
+
+            if (siteMetrics.Assets != null)
+                foreach (var metric in siteMetrics.Assets)
+                {
+                    var fields = typeof(AssetPerformance).GetProperties()
+                                                         .Where(methodInfo => methodInfo.GetCustomAttributes(typeof(PrometheusAttribute), true).Length > 0)
+                                                         .ToList();
+                    foreach (var field in fields)
+                    {
+                        name = field.GetCustomAttributes(typeof(PrometheusAttribute), true)[0].ToString();
+
+                        sb.AppendLine($"# HELP {name} (SystemDriverResidentBytes)");
+                        sb.AppendLine($"# TYPE {name} gauge");
+                        sb.AppendLine($"{name}{{asset=\"{metric.name}\",type=\"{metric.entryType}\"}} {field.GetValue(metric)}");
+                    }
+                }
+            return Ok(sb.ToString());
+        }
+
+        [Route("old")]
+        public async Task<IActionResult> OldAsync(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+                return Json("");
+
             var siteMetrics = await _services.AccessPageAndTakeScreenshot(url.NormalizeUrl(), true);
 
             StringBuilder sb = new StringBuilder();
