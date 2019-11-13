@@ -56,6 +56,11 @@ namespace tester_api.Controllers
             sb.AppendLine($"# TYPE {name} gauge");
             sb.AppendLine($"{name}{{response=\"{metrics.SiteStatus}\",screenshot=\"{metrics.ScreenShotPath}\"}} {metrics.IsSiteUp}");
 
+            name = "site_up_raw";
+            sb.AppendLine($"# HELP {name} TRL");
+            sb.AppendLine($"# TYPE {name} gauge");
+            sb.AppendLine($"{name} {metrics.IsSiteUp}");
+
             if (metrics.Assets != null)
                 foreach (var metric in metrics.Assets)
                 {
