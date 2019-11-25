@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		restart.sh = restart.sh
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tester-curl-api", "tester-curl-api\tester-curl-api.csproj", "{61E9FD19-9D29-4A7D-976E-7FE6D3E2A848}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{8942F7F3-66B8-4892-8FD4-C4A17A129C42}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8942F7F3-66B8-4892-8FD4-C4A17A129C42}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8942F7F3-66B8-4892-8FD4-C4A17A129C42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61E9FD19-9D29-4A7D-976E-7FE6D3E2A848}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61E9FD19-9D29-4A7D-976E-7FE6D3E2A848}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61E9FD19-9D29-4A7D-976E-7FE6D3E2A848}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61E9FD19-9D29-4A7D-976E-7FE6D3E2A848}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
