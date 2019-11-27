@@ -18,7 +18,7 @@ namespace tester_curl_api.Controllers
         }
 
         [HttpGet]
-        public string Get(string url)
+        public async System.Threading.Tasks.Task<string> GetAsync(string url)
         {
             var escapedArgs = "-i -L -S --stderr - http://" + url;
 
@@ -36,8 +36,8 @@ namespace tester_curl_api.Controllers
             };
 
             process.Start();
-            string result = process.StandardOutput.ReadToEnd();
-            process.WaitForExit(61000);
+            string result = await process.StandardOutput.ReadToEndAsync();
+            await process.WaitForExitAsync(); //61000
 
             var obj = new Output();
 

@@ -1,0 +1,14 @@
+version: '3.7'
+services:
+
+  curl_exporter:
+    image: curl_exporter
+    restart: always
+    ports:
+      - '8082:80'
+    deploy:
+      replicas: 5
+      mode: replicated
+      resources:
+        memory: 200M
+        cpus: '2'
