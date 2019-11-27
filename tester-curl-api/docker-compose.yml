@@ -10,5 +10,6 @@ services:
       replicas: 5
       mode: replicated
       resources:
-        memory: 200M
-        cpus: '2'
+        limits:
+          memory: 200M
+          cpus: '2'
