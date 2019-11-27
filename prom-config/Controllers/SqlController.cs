@@ -40,29 +40,30 @@ namespace prom_config.Controllers
         public void Post([FromBody] string body)
         {
             Dictionary<string, SdModel> dic = new Dictionary<string, SdModel>();
-            dic.Add("tatooine", new SdModel { labels = new Labels { box = "tatooine" }, targets = new List<string>() });
-            dic.Add("naboo", new SdModel { labels = new Labels { box = "naboo" }, targets = new List<string>() });
-            dic.Add("kamino", new SdModel { labels = new Labels { box = "kamino" }, targets = new List<string>() });
-            dic.Add("geonosis", new SdModel { labels = new Labels { box = "geonosis" }, targets = new List<string>() });
+            //dic.Add("tatooine", new SdModel { labels = new Labels { box = "tatooine" }, targets = new List<string>() });
+            //dic.Add("naboo", new SdModel { labels = new Labels { box = "naboo" }, targets = new List<string>() });
+            //dic.Add("kamino", new SdModel { labels = new Labels { box = "kamino" }, targets = new List<string>() });
+            //dic.Add("geonosis", new SdModel { labels = new Labels { box = "geonosis" }, targets = new List<string>() });
 
             var lines = body.Replace("\r", "").Split('\n');
             foreach (var line in lines)
             {
                 var parts = line.Split('\t');
                 var domain = parts[0].Trim();
-                var box = parts[1].Trim();
-                if (dic.ContainsKey(box))
-                {
-                    dic[box].targets.Add(domain);
-                }
+                var server = parts[1].Trim(); //server also can mean a box (ex: tatooine)
+                
+                if (!dic.ContainsKey(server))
+                    dic.Add(server, new SdModel { labels = new Labels { box = server }, targets = new List<string>() });
+
+                dic[server].targets.Add(domain);
             }
 
-            foreach (var box in dic)
+            foreach (var server in dic)
             {
                 SdModel[] array = new SdModel[1];
-                array[0] = box.Value;
+                array[0] = server.Value;
                 var serialized = Newtonsoft.Json.JsonConvert.SerializeObject(array);
-                System.IO.File.WriteAllText($"{Startup.BasePath}/targets.{box.Key}.json", serialized);
+                System.IO.File.WriteAllText($"{Startup.BasePath}/targets.{server.Key}.json", serialized);
             }
 
             //foreach (var box in groups)
