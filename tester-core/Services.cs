@@ -74,11 +74,21 @@ namespace tester_core
             string title = await page.GetTitleAsync();
             //Console.WriteLine("b");
 
+            //if (title.StartsWith("503"))
+            //    throw new Exception("Page title starts with 503");
+
+            //if ((int)response.Status >= 300)
+            //    throw new Exception("Status >= 300; " + (int)response.Status);
+            EnsurePageLooksOkUnsafe(title, (int)response.Status);
+        }
+
+        private void EnsurePageLooksOkUnsafe(string title, int status)
+        {
             if (title.StartsWith("503"))
                 throw new Exception("Page title starts with 503");
 
-            if ((int)response.Status >= 300)
-                throw new Exception("Status >= 300; " + (int)response.Status);
+            if (status >= 300)
+                throw new Exception("Status >= 300; " + status);
         }
 
         public async Task<SiteMetrics> AccessPage(string url)
@@ -463,7 +473,10 @@ namespace tester_core
                 if (response == null)
                     throw new Exception("Null response for " + url);
 
-                await EnsurePageLooksOkUnsafe(page, response);
+                siteMetrics.Title = await page.GetTitleAsync();
+                siteMetrics.Status = (int)response.Status;
+
+                EnsurePageLooksOkUnsafe(siteMetrics.Title, siteMetrics.Status);
 
                 siteMetrics.SiteStatus = /*rsp +*/ response.Status.ToString();
 
@@ -477,6 +490,7 @@ namespace tester_core
             catch (NavigationException e) when (e.Message.StartsWith("net::"))
             {
                 siteMetrics.SiteStatus += e.Message.Split(" ")[0];
+                siteMetrics.Status = 999;
                 return siteMetrics;
             }
             catch (Exception e)
@@ -488,6 +502,7 @@ namespace tester_core
                 }
 
                 siteMetrics.SiteStatus += e.Message;
+                siteMetrics.Status = 999;
                 return siteMetrics;
             }
 

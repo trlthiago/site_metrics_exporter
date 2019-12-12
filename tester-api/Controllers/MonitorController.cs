@@ -27,14 +27,16 @@ namespace tester_api.Controllers
             StringBuilder sb = new StringBuilder();
 
             var name = "site_up";
-            sb.AppendLine($"# HELP {name} TRL");
             sb.AppendLine($"# TYPE {name} gauge");
             sb.AppendLine($"{name}{{response=\"{siteMetrics.SiteStatus}\",screenshot=\"{siteMetrics.ScreenShotPath}\"}} {siteMetrics.IsSiteUp}");
 
             name = "site_up_raw";
-            sb.AppendLine($"# HELP {name} TRL");
             sb.AppendLine($"# TYPE {name} gauge");
             sb.AppendLine($"{name} {siteMetrics.IsSiteUp}");
+
+            name = "site_5xx";
+            sb.AppendLine($"# TYPE {name} gauge");
+            sb.AppendLine($"{name} {siteMetrics.IsSiteStatus5xx}");
 
             if (siteMetrics.Assets != null)
                 foreach (var metric in siteMetrics.Assets)
