@@ -502,7 +502,9 @@ namespace tester_core
                 }
 
                 siteMetrics.SiteStatus += e.Message;
-                siteMetrics.Status = 999;
+                if (siteMetrics.Status == 0)
+                    siteMetrics.Status = 999;
+
                 return siteMetrics;
             }
 
