@@ -2,7 +2,7 @@
 {
     public class SitesModel
     {
-        public string Domain { get; set; }
+        public string Identifier { get; set; }
         public string Box { get; set; }
     }
 }

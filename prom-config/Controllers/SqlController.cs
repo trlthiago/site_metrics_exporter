@@ -37,14 +37,11 @@ namespace prom_config.Controllers
 
         // POST: api/Sites
         [HttpPost]
-        public void Post([FromBody] string body)
+        [Consumes("text/plain")]
+        public void Post([FromBody]string body)
         {
             Dictionary<string, SdModel> dic = new Dictionary<string, SdModel>();
-            //dic.Add("tatooine", new SdModel { labels = new Labels { box = "tatooine" }, targets = new List<string>() });
-            //dic.Add("naboo", new SdModel { labels = new Labels { box = "naboo" }, targets = new List<string>() });
-            //dic.Add("kamino", new SdModel { labels = new Labels { box = "kamino" }, targets = new List<string>() });
-            //dic.Add("geonosis", new SdModel { labels = new Labels { box = "geonosis" }, targets = new List<string>() });
-
+            
             var lines = body.Replace("\r", "").Split('\n');
             foreach (var line in lines)
             {
@@ -65,22 +62,6 @@ namespace prom_config.Controllers
                 var serialized = Newtonsoft.Json.JsonConvert.SerializeObject(array);
                 System.IO.File.WriteAllText($"{Startup.BasePath}/targets.{server.Key}.json", serialized);
             }
-
-            //foreach (var box in groups)
-            //{
-            //    var config = new SdModel
-            //    {
-            //        labels = new List<Tuple<string, string>> { new Tuple<string, string>("box", box.Key) }
-            //    };
-
-            //    foreach (var site in box)
-            //    {
-            //        config.targets.Add(site.Domain);
-            //    }
-
-            //    var serialized = Newtonsoft.Json.JsonConvert.SerializeObject(config);
-            //    System.IO.File.WriteAllText($"{Startup.BasePath}/targets.{box.Key}.json", serialized);
-            //}
         }
 
         // DELETE: api/ApiWithActions/kamino

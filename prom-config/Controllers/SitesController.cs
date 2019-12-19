@@ -37,34 +37,31 @@ namespace prom_config.Controllers
 
         // POST: api/Sites
         [HttpPost]
-        public void Post([FromBody] List<SitesModel> model)
+        public void Post([FromBody] List<SitesModel> model) /*List<SitesModel>*/
         {
-            var groups = model.GroupBy(x => x.Box);
 
-            var configs = new List<SdModel>();
-
-            foreach (var box in groups)
+            Dictionary<string, SdModel> dic = new Dictionary<string, SdModel>();
+            foreach (var item in model)
             {
-                var config = new SdModel
-                {
-                    //labels = new List<Tuple<string, string>> { new Tuple<string, string>("box", box.Key) }
-                    labels = new Labels { box = box.Key }
-                };
+                if (!dic.ContainsKey(item.Box))
+                    dic.Add(item.Box, new SdModel { labels = new Labels { box = item.Box }, targets = new List<string>() });
 
-            foreach (var site in box)
-            {
-                config.targets.Add(site.Domain);
+                dic[item.Box].targets.Add(item.Identifier);
             }
 
-            var serialized = Newtonsoft.Json.JsonConvert.SerializeObject(config);
-            System.IO.File.WriteAllText($"{Startup.BasePath}/targets.{box.Key}.json", serialized);
+            foreach (var server in dic)
+            {
+                SdModel[] array = new SdModel[1];
+                array[0] = server.Value;
+                var serialized = Newtonsoft.Json.JsonConvert.SerializeObject(array);
+                System.IO.File.WriteAllText($"{Startup.BasePath}/targets.{server.Key}.json", serialized);
+            }
+        }
+
+        // DELETE: api/ApiWithActions/kamino
+        [HttpDelete("{box}")]
+        public void Delete(string box)
+        {
         }
     }
-
-    // DELETE: api/ApiWithActions/kamino
-    [HttpDelete("{box}")]
-    public void Delete(string box)
-    {
-    }
-}
 }
